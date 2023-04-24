@@ -37,7 +37,7 @@ A API estará disponível em http://localhost:5000 ou https://localhost:5001.
 * Método: GET
 * URL: /KubernetesController/BuscarServices
 
-### BuscarNomeDeContainers
+### BuscarNomeDosContainers
 * Método: GET
 * URL: /KubernetesController/BuscarNomeDeContainers?podName=<podName>
 

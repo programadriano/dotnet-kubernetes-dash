@@ -53,5 +53,11 @@ public class KubernetesController : ControllerBase
         return Ok(_kubernetesLib.GetPodServiceDetails(serviceName));
     }
 
+    [HttpGet("BuscarNodesENamespacesInfo")]
+    public IActionResult GetNodeAndNamespacesInfo()
+    {
+        return Ok(_kubernetesLib.GetNodeAndNamespacesInfo());
+    }
+
 }
 

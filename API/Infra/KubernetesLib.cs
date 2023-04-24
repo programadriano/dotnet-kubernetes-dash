@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using System.Xml.Linq;
 using API.Models;
 using k8s;
+using Org.BouncyCastle.Crypto.Tls;
 
 namespace API.Infra
 {
@@ -140,6 +142,59 @@ namespace API.Infra
             serviceDetail.ServiceLabel = new ServiceLabel(selector.Key, selector.Value);
 
             return serviceDetail;
+        }   
+
+        public KubernetesInfo GetNodeAndNamespacesInfo()
+        {
+            var config = KubernetesClientConfiguration.BuildDefaultConfig();
+            var k8sClient = new Kubernetes(config);
+
+            // Get Nodes
+            var nodeList =  k8sClient.ListNode();
+
+            var result = new KubernetesInfo();
+
+            foreach (var node in nodeList.Items)
+            {
+                var nodeInfo = new Nodes
+                {
+                    NodeInfo = new NodeInfo(
+                        node.Status.NodeInfo.Architecture,
+                        node.Status.NodeInfo.BootID,
+                        node.Status.NodeInfo.ContainerRuntimeVersion,
+                        node.Status.NodeInfo.KernelVersion,
+                        node.Status.NodeInfo.KubeProxyVersion,
+                        node.Status.NodeInfo.KubeletVersion,
+                        node.Status.NodeInfo.MachineID,
+                        node.Status.NodeInfo.OperatingSystem,
+                        node.Status.NodeInfo.OsImage,
+                        node.Status.NodeInfo.SystemUUID),
+                    MetaData = new MetaData { Name = node.Metadata.Name, CreateAt = node.Metadata.CreationTimestamp, LabelsTotal = node.Metadata.Labels.Count },
+                    Status = new Status
+                    {
+                        Capacity = node.Status.Capacity
+                    }
+
+                };
+
+                result.Nodes.Add(nodeInfo);
+            }
+
+            // Get Namespaces
+            var namespaceList =  k8sClient.ListNamespace();
+            foreach (var ns in namespaceList.Items)
+            {
+                var k8sNamespaces = new KubernetesNamespaces
+                {
+                    Name = ns.Metadata.Name,
+                    Phase = ns.Status.Phase
+                };
+
+                result.KubernetesNamespaces.Add(k8sNamespaces);
+            }
+         
+
+            return result;        
         }
     }
 
